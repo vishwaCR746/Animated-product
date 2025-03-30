@@ -6,9 +6,11 @@ const infoItems = document.querySelectorAll('.info-item');
 const nextBtn = document.querySelector('.next-btn');
 const prevBtn = document.querySelector('.prev-btn');
 
-let colors = ['#3674be','#d26181','#ceb13d','#c6414c','#171f2b','#50aa61']
+let colors = ['#3674be', '#d26181', '#ceb13d', '#c6414c', '#171f2b', '#50aa61'];
 let indexSlider = 0;
 let index = 0;
+let startX = 0;
+let endX = 0;
 
 const slider = () => {
     imgSlider.style.transform = `rotate(${indexSlider * 60}deg)`;
@@ -23,27 +25,41 @@ const slider = () => {
     document.querySelector('.info-item.active').classList.remove('active');
     infoItems[index].classList.add('active');
 
-    document.body.style.background = colors[index]
-}
+    document.body.style.background = colors[index];
+};
 
-nextBtn.addEventListener('click', () => {
+// Handle next and previous clicks
+const nextSlide = () => {
     indexSlider++;
-    index++;
-    if(index > imgItems.length - 1)
-    {
-        index = 0;
-    }
-
+    index = (index + 1) % imgItems.length;
     slider();
+};
+
+const prevSlide = () => {
+    indexSlider--;
+    index = (index - 1 + imgItems.length) % imgItems.length;
+    slider();
+};
+
+nextBtn.addEventListener('click', nextSlide);
+prevBtn.addEventListener('click', prevSlide);
+
+// Handle touch/swipe gestures for mobile users
+document.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
 });
 
-prevBtn.addEventListener('click', () => {
-    indexSlider--;
-    index--;
-    if(index < 0)
-    {
-        index = imgItems.length-1;
-    }
+document.addEventListener('touchmove', (e) => {
+    endX = e.touches[0].clientX;
+});
 
-    slider();
+document.addEventListener('touchend', () => {
+    let diff = startX - endX;
+    if (Math.abs(diff) > 50) {  // Minimum swipe threshold
+        if (diff > 0) {
+            nextSlide();  // Swipe left → Next
+        } else {
+            prevSlide();  // Swipe right → Previous
+        }
+    }
 });
